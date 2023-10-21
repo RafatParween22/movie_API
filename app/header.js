@@ -5,7 +5,7 @@ function Header() {
     <>
       <div className="header">
         <div>
-          <img src="Icon - Logo.png" alt="Logo" className="logo" />
+          <img src="icon - Logo.jpg"className="logo" />
         </div>
         <div>
           <img src="Movie Hub.png" alt="Movie Hub" className="logo1" />
