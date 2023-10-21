@@ -1,95 +1,123 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import React, { useState, useEffect } from 'react';
+import  Movie_row from './movie_row';
+import Header from './header';
+import Add_movie from './add_movie';
+function Page() {
+  const [movieData, setMovieData] = useState([]);
+  const [likes, setLikes] = useState({});
+  
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+  const fetchData = () => {
+    fetch('https://api.themoviedb.org/3/movie/top_rated?api_key=89eef3426d167c3c8145a257ebe68357&')
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+     .then(response => response.json())
+     
+     .then(movieData => {
+         setMovieData(movieData.results.slice(0, 10))
+         console.log(movieData);
+      })
+     
+      .catch(error => {
+         console.error('Error fetching data:', error)
+       });
+   };
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+   useEffect(() => {
+      fetchData();
+   }, []);
+   console.log(likes,"like")
+   
+   const handleDelete = (id) => {
+        console.log(id,"delete")
+        const updatedMoviedata = movieData.filter((movie) => movie.id !== id);
+        setMovieData(updatedMoviedata);
+    }    
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+   
+    const handleLike = (id) => {
+       console.log(id,"id")
+       const updatedLikes = { ...likes };
+       
+             if (updatedLikes[id] !== undefined){
+                   updatedLikes[id] +=  1;
+                   
+              } else {
+                   updatedLikes[id] = 1;
+       }
+       
+       setLikes(updatedLikes);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
+    };
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    const handleDislike = (id) => {
+        const updatedLikes = { ...likes };
+        
+        if (updatedLikes[id] !== undefined) {
+             updatedLikes[id] -= 1;
+             
+        } else {
+              pdatedLikes[id] = 1;
+              
+        }
+        setLikes(updatedLikes);
+    
+    };
+    
+    
+    const sortedDataArray = movieData.sort((a, b) => {
+    
+        console.log(a,"a")
+        console.log(b,"b")
+        
+        let likesA = 0;
+        let likesB = 0;
+
+        if (likes[a.id] !== undefined) {
+           likesA = likes[a.id];
+           console.log(likesA,"likeAh ")
+        }
+
+        if (likes[b.id] !== undefined) {
+             likesB = likes[b.id];
+         }
+
+          return likesB - likesA;
+     });
+
+      const addMovieData = (newData) =>{
+      
+          setMovieData([...movieData, newData]);
+          
+      };
+    
+      return(
+   
+      <div>
+         <Header/>
+      
+         {sortedDataArray.map((movie) => (
+         
+            <Movie_row
+            
+               key={movie.id}
+               
+               movie={movie}
+               
+               onDelete={() => handleDelete(movie.id)}
+               
+               onLike={() => handleLike(movie.id)}
+               
+               onDislike={() => handleDislike(movie.id)}
+               
+               like={likes[movie.id]}
+               
+             />
+          ))}
+          <Add_movie addMovieData={addMovieData}/>
+      
+    </div>
+  );
 }
+export default Page;
+
